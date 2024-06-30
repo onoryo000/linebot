@@ -1,0 +1,111 @@
+function GeminiImg(message, imageid,i) {
+
+var convImage = ImgApp.doResize(imageid, 500);
+const payload = {
+contents': [{
+parts': [{
+text': message
+},
+{
+inlineData': {
+mimeType': 'image/png',
+data': Utilities.base64Encode(convImage.blob.getBytes())
+}
+}]
+}]
+}
+
+const options = {
+method': 'post',
+contentType': 'application/json',
+payload': JSON.stringify(payload)
+};
+
+const response = UrlFetchApp.fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro-vision:generateContent?key=' +GEMINI_API, options)
+
+const chatreply = JSON.parse(response.getContentText());
+UserSheet.getRange(i+1, 10).clearContent();
+var image = DriveApp.getFileById(imageid);
+image.setTrashed(true);
+return chatreply.candidates[0].content.parts[0].text;
+
+}
+
+
+
+function GeminiText(arr_message,message) {
+
+const payload = {
+"contents": [
+{"role":"user",
+"parts":[{
+"text": arr_message[0][4]}]
+},
+{"role": "model",
+"parts":[{
+"text": arr_message[0][5]}]
+},
+{"role": "user",
+"parts":[{
+"text": arr_message[0][2]}]
+},
+{"role": "model",
+"parts":[{
+"text": arr_message[0][3]}]
+},
+{"role": "user",
+"parts":[{
+"text": arr_message[0][0]}]
+},
+{"role": "model",
+"parts":[{
+"text": arr_message[0][1]}]
+},
+{"role": "user",
+"parts":[{
+"text": message}]
+}, ]}
+
+
+const options = {
+method': 'post',
+contentType': 'application/json',
+payload': JSON.stringify(payload)
+};
+
+try {
+const response = UrlFetchApp.fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=' +GEMINI_API, options)
+
+const chatreply = JSON.parse(response.getContentText());
+
+return chatreply.candidates[0].content.parts[0].text;
+} catch (error) {
+
+return 'エラーが発生しました。時間をおいて再度実行してみてください。';
+}
+}
+
+function GeminiTextFirst(message) {
+
+const payload = {
+"contents": [
+{"role": "user",
+"parts":[{
+"text": message}]
+}, ]}
+
+
+const options = {
+method': 'post',
+contentType': 'application/json',
+payload': JSON.stringify(payload)
+};
+try {
+const response = UrlFetchApp.fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=' +GEMINI_API, options)
+const chatreply = JSON.parse(response.getContentText());
+return chatreply.candidates[0].content.parts[0].text;
+} catch (error) {
+
+return 'エラーが発生しました。時間をおいて再度実行してみてください。';
+}
+}
